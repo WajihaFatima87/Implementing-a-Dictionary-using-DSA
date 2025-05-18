@@ -1,0 +1,817 @@
+#include <iostream>
+using namespace std;
+#include <cstdlib>
+#include <sstream>
+#include <fstream>
+#include <string>
+#include <vector>
+#include <string>
+#include <map>
+#include <set>
+#include <algorithm>
+
+//----------------------------------------
+//          Favorites CLASS
+//----------------------------------------
+class Favorites{
+public:
+    string word;   //data part to store word
+    Favorites *next;
+
+    //Constructors
+    Favorites(){
+    }
+
+    Favorites(string word){
+        this->word = word;
+    }
+};
+
+
+//----------------------------------------
+//         FavoritesList CLASS
+//----------------------------------------
+class FavoritesList{
+public:
+    Favorites *start;   //node to store the address of starting node
+    Favorites *last;
+    Favorites *loc;
+    Favorites *ploc;
+
+    //Consructor
+    FavoritesList()
+    {
+        start = NULL;
+        last = NULL;
+    }
+
+    /*******************************************
+    * Insert Favorite word
+    * Time Complexity O(1)
+    ********************************************/
+    void InsertFavorite(string word)
+    {
+        Favorites *newnode = new Favorites();
+        newnode->word= word;
+
+        //if value found in the head node
+        if (start == NULL)
+            //start points to new_node in case of empty list
+            start = newnode;
+            //if value is either in the middle or at tail end
+        else
+            last->next = newnode;//complexity(O(1))
+        last = newnode;
+    }
+
+
+    //isEmpty() Method
+    bool isEmpty(){
+        if (start == NULL) //the list is empty if  start has null value
+            return true;
+        else
+            return false;
+    }
+
+    /******************************
+    * Searches a word in the list
+    *******************************/
+    void Search(string value){
+
+        loc = start;
+        ploc = NULL;
+
+        while (loc != NULL && loc->word < value){
+            ploc = loc;
+            loc = loc->next;
+        }
+        if (loc != NULL && loc->word != value){
+            loc = NULL;
+        }
+    }
+
+    /*******************************
+    *         MergeSort
+    ********************************/
+    void MergeSort(Favorites** node)   //for sorting the favorites listby refering to nodes and changing the next pointers
+    {
+        Favorites* head = *node;
+        Favorites* node_x;
+        Favorites* node_y;
+
+        // Base case
+        if ((head == NULL) || (head->next == NULL)) {
+            return;
+        }
+
+        //Splitting the list into sublists
+        Split(head, &node_x, &node_y);
+
+        /***********************************
+        *  Recursion for merge Sort
+        ************************************/
+        MergeSort(&node_x);
+        MergeSort(&node_y);
+
+        //merging the sorted lists
+        *node= Merge(node_x, node_y);
+    }
+
+    /*******************************
+    *           Merge
+    ********************************/
+    Favorites* Merge(Favorites* a, Favorites* b)
+    {
+        Favorites* temp; //for putting result
+        temp =  NULL;
+
+        // Base cases
+        if (a == NULL)
+            return (b);
+        else if (b == NULL)
+            return (a);
+
+        // Comparing data part at the two divided lists
+        if (a->word <= b->word) {
+            temp = a;
+            temp->next = Merge(a->next, b); //Recursively  merging
+        }
+        else {
+            temp = b;
+            temp->next = Merge(a, b->next);
+        }
+        return (temp);
+    }
+
+    /*******************************
+    *        Split
+    ********************************/
+    void Split(Favorites* source,Favorites** left, Favorites** right)
+    {
+        Favorites* loc;
+        Favorites* sloc;
+        loc = source;
+        sloc = source->next;
+
+        // Incrementing  sloc two nodes, and  loc one node
+        while (sloc != NULL) {
+            sloc = sloc->next;
+            if (sloc != NULL) {
+                loc = loc->next;
+                sloc = sloc->next;
+            }
+        }
+
+        // loc is before the midpoint in the list, so split it in two  at that point.
+        *left = source;
+        *right = loc->next;
+        loc->next = NULL;
+    }
+
+    /****************************************
+    * Prints the List of Favorite Words
+    * in Alphabetical Order using Merge Sort
+    * Time Complexity O(n); n= size of list
+    *****************************************/
+    void PrintFavorites(Favorites *start){
+        MergeSort(&start);
+
+        Favorites *temp = start; //temporary node that points to start
+        int x = 0;
+
+        if (!isEmpty()){
+            cout<<"__________________________________________________________"<<endl;
+            cout<<"   ######### FAVORITES LIST LEXICOGRAPHICALLY ######### "<<endl<<endl;
+            //print until the list ends
+            while (temp != NULL){
+                cout <<temp->word<<"     ";
+                //temp points to the next favorite word
+                temp = temp->next;
+            }
+            cout<<"\n________________________________________________________"<<endl;
+        }
+        else
+            cout << "List is Empty!" << endl;
+    }
+
+    /************************************
+    * DeleteFavorites
+    * deletes a word from favorites list
+    *************************************/
+    void DeleteFavorites(string word){
+        if (!isEmpty()){ //check if the list is empty
+            Search(word);
+
+            if (loc != NULL){//if value is found
+
+                if (ploc == NULL){//if value is in head node
+
+                    if (last == start){ //if there is only one value
+                        start = NULL;
+                        last = NULL;
+                    }
+                    else{
+                        start = loc->next;
+
+                    }
+                    delete loc;
+                }
+                else if (last == loc){// if value is at tail end
+                    ploc->next = last->next;
+                    last = ploc; //update last
+
+                    delete loc;
+                }
+                else{//if ploc is non-Null
+                    ploc->next = loc->next;
+                    delete loc;
+                }
+                cout<<"Word \""<<word<<"\" deleted from Favorites List."<<endl;
+                cout<<"_________________________________________________________"<<endl;
+            }
+            else{ //if the value is not found in the list
+                cout<<"Word "<<word<<" not Found!"<<endl;
+                return;
+            }
+        }
+        else
+            cout << "Favorites List is Empty" << endl;
+    }
+};
+
+
+
+//----------------------------------------
+//          EXAMPLENODE CLASS
+//----------------------------------------
+class ExampleNode{
+public:
+    string data;   //data part to store example
+    ExampleNode *next;
+
+    ExampleNode(){
+    }
+
+    ExampleNode(string example){
+        data = example;
+    }
+};
+
+
+//----------------------------------------
+//          EXAMPLELIST CLASS
+//----------------------------------------
+class ExampleList{
+public:
+    ExampleNode *start;   //node to store the address of starting node
+    ExampleNode *last;
+
+    //Consructor
+    ExampleList()
+    {
+        start = NULL;
+        last = NULL;
+    }
+
+    /*******************************************
+    * Insert Example
+    * pExample points to the example
+    * list related to a word.
+    * Time Complexity O(1)
+    ********************************************/
+    void InsertExample(string Example)
+    {
+        ExampleNode *newnode = new ExampleNode();
+        newnode->data= Example;
+
+        //if value found in the head node
+        if (start == NULL)
+            //start points to new_node in case of empty list
+            start = newnode;
+            //if value is either in the middle or at tail end
+        else
+            last->next = newnode;
+        last = newnode;
+    }
+
+
+    //isEmpty() Method
+    bool isEmpty(){
+        if (start == NULL) //the list is empty if  start has null value
+            return true;
+        else
+            return false;
+    }
+
+
+    /****************************************
+    * Prints the List of Examples
+    * Time Complexity O(n); n= size of list
+    *****************************************/
+    void PrintExampleList(ExampleNode *start){
+        ExampleNode *temp = start; //temporary node that points to start
+        int x = 0;
+
+        if (!isEmpty()){
+            //print until the list ends
+            while (temp != NULL){
+                cout <<"Example "<<++x<<": " <<temp->data <<endl<<endl;
+
+                //temp points to the next example sentence
+                temp = temp->next;
+            }
+        }
+        else
+            cout << "Example List is Empty!" << endl;
+    }
+};
+
+//---------------------------------------
+//            ENTRY CLASS
+//---------------------------------------
+class entry
+{
+public:
+    string word;      //field to store the word
+    string meaning;   //field to store meaning of the word
+    ExampleList *pExample;  //pointer field to point to the Examples List
+};
+
+//---------------------------------------
+//            HASH CLASS
+//---------------------------------------
+class Hash
+{
+private:
+    static const int tableSize = 14009;
+
+public:
+    //creates The Hash Table
+    entry *HashTable[tableSize];
+
+
+public:
+    /**********************************************
+    * Constructor
+    * creates a new HashNode and initializes
+    * all the fields to NULL
+    **********************************************/
+    Hash ()
+    {
+        for (int i = 0; i < tableSize; i++)
+        {
+            HashTable[i] = new entry;
+            HashTable[i]->word = "";
+            HashTable[i]->meaning = "";
+        }
+    }
+
+
+    /**************************************************
+    * HashFunction
+    * Returns index for a specific key of string type.
+    * Time Complexity O(length of key)
+    ***************************************************/
+    int hashFunction (string key)
+    {
+        key = MakeLower(key);
+
+        //this function decides which index to place the key in
+        int hash = 0;
+        int index;
+        int x=0;
+
+        for (int i = key.length()-1 ; i>=0 ; i--)
+        {
+            //using Radix Notation
+            hash = hash + (((int) key[i]) * (128)^x);
+            x++;
+        }
+
+        index = hash % tableSize;
+
+        return index;
+    }
+
+    /***********************************************************
+    * InsertWord
+    * Inserts the word alongwith its meaning and
+    * pointer to Examples List in the HashTable
+    * Average Case Omega(word length)
+    * if no empty space available Time Complexity O(tableSize)
+    ************************************************************/
+    void InsertWord(string word, string meaning,ExampleList *pExample)
+    {
+        //Function manually adds item to the tree
+        int index = hashFunction (word);
+
+        //if index is empty
+        if (HashTable[index]->word == "")
+        {		// if table is empty
+            HashTable[index]->word = word;
+            HashTable[index]->meaning = meaning;
+            HashTable[index]->pExample = pExample;
+        }
+        else
+        {
+            /*****************
+            Quadratic Probing
+            ******************/
+            for(int j=0; j<tableSize; j++){
+                int idx= (index + j*j) % tableSize;
+
+                //insert in the table and break the loop
+                if(HashTable[idx]->word == ""){
+
+                    HashTable[idx]->word = word;
+                    HashTable[idx]->meaning = meaning;
+                    HashTable[idx]->pExample = pExample;
+                    break;
+                }
+            }
+        }
+
+    }
+    /**********************************************
+    * MakeLower
+    * Converts the user entered string to lower
+    * case to avoid inconvenience
+    * Time Complexity O(word)
+    ***********************************************/
+    string MakeLower(string word){
+
+        //makes all characters of string lowercase
+        for (int i=0; i< word.length(); i++){
+            word[i] = tolower(word[i]);
+        }
+        return word;
+    }
+
+    /*******************************************
+    * SearchWord
+    * searches a word in hashtable and returns
+    * its index
+    * Average Time Complexity Omega(1)
+    * if word is found at the original index, Theta(1)
+    * if word is not found, Big-O(tableSize)
+    ********************************************/
+    int SearchWord(string word){
+
+        word = MakeLower(word);
+
+        //Finds user-entered word in hash table
+        int index = hashFunction(word);  //find the index of the given word
+
+        //if word is located at its original position
+        if(HashTable[index]->word == word){
+            return index;
+        }
+            //else find the word through quadratic probing
+        else{
+            for(int j=0; j<tableSize; j++){
+                int idx= (index + j*j) % tableSize;
+
+                //if word matches at any other(logical) position,
+                //return the index
+                if(HashTable[idx]->word == word){
+                    return idx;
+                }
+            }
+        }
+        //if still not found, return -1
+        return -1;
+    }
+
+    /**************************************
+    * ShowMeaning
+    * Displays the meaning of a word
+    * Average Case Omega(1)
+    **************************************/
+    void showMeaning(string word)
+    {
+        //searches word and get its index
+        int index = SearchWord(word);
+
+        if(index == -1){
+            //if word is not present
+            cout << "Word \"" << word << "\" not Found in dictionary!! " << endl;
+        }
+            //Prints the word and its meaning
+        else{
+            cout<<"---------------------------------------------------------"<<endl;
+            cout << "WORD : " << word << endl;
+            cout << "\nMEANING  : " << HashTable[index]->meaning << endl;
+            cout<<"---------------------------------------------------------"<<endl<<endl;
+        }
+    }
+
+    /*********************************************
+    * ShowSentences
+    * This method Displays the example sentences for
+    * a given word
+    * Time Complexity O(n)
+    **********************************************/
+    void ShowSentences(string word){
+        int index = SearchWord(word);
+
+        if(index == -1){
+            //if word is not present
+            cout << "Word \"" << word << "\" not Found in dictionary!! " << endl;
+        }
+            //Prints the word and its meaning
+        else{
+            cout<<"__________________________________________________________"<<endl;
+            cout << "WORD : " << word << endl<<endl;
+
+            ExampleList *eList = HashTable[index]->pExample;
+
+            //Prints the Example Sentences from the List of examples maintained for that word
+            eList->PrintExampleList(eList->start);
+            cout<<"__________________________________________________________"<<endl<<endl;
+        }
+
+    }
+    /**********************************************
+    * AddToFavorites
+    * Adds a word chosen by the user to the list
+    * of his favorite words
+    **********************************************/
+    void AddToFavorites(string word, FavoritesList *favorite){
+        //searches the word
+        int index = SearchWord(word);
+
+        if (index == -1){
+            cout << "Word \"" << word << "\" not Found in dictionary!! " << endl;
+        }
+        else
+        {
+            //inserting word and its meaning to the favorites list
+            favorite->InsertFavorite(word);
+            cout<<"Word \""<<word<<"\" added to Favorites List."<<endl;
+            cout<<"_________________________________________________________"<<endl;
+        }
+
+    }
+    /***************************************************
+    * ShowFavorites
+    * shows the list of favorite words chosen by
+    * the user in Alphabetical Order (using Merge Sort)
+    ****************************************************/
+    void ShowFavorites(FavoritesList *favorite){
+        favorite->PrintFavorites(favorite->start);
+    }
+
+
+    /************************************
+    * DeleteFavorites
+    * deletes a word from favorites list
+    *************************************/
+    void DeleteFromFavorites(string word, FavoritesList *favorite){
+        favorite->DeleteFavorites(word);  //calling delete Method from FavoritesList
+
+    }
+
+
+    /*****************************************
+    * AddSentence
+    * adds a new sentence to the table entered
+    * by user
+    * Average Case Omega(1)
+    ******************************************/
+    void AddSentence(string word ) {
+
+        int index = SearchWord(word);
+        string sentence;
+
+        ExampleList *eList = HashTable[index]->pExample;
+
+        if (index == -1){
+            cout << "Word \"" << word << "\" not Found in dictionary!! " << endl;
+        }
+        else
+        {
+            cout<<"____________________________________________________"<<endl;
+            cout << "Enter the sentence for this word: " << word << endl;
+
+            getline(cin, sentence);
+
+            //inserts the sentence into the list
+            eList->InsertExample(sentence);
+
+            //sentence added message
+            if(eList->last->data == sentence)
+                cout << "\nSentence for "<<word<< " is Successfully added"<<endl<<endl;
+            cout<<"_____________________________________________________"<<endl;
+        }
+    }
+
+
+    /**************
+        Parser
+    ***************/
+    void Parser(){
+
+        ifstream myfilestream ("C:/word-meaning-examples-.csv");
+
+        if(!myfilestream.is_open()){
+            cout << "FAILED TO OPEN THIS FILE" << endl;
+        }
+        else{
+            // cout<< "File is successfully opened!!!"<<endl;
+
+            /*
+            * Initializing Variables
+            */
+            string word;
+            string meaning ;
+            string Examples_0;
+            string Examples_1;
+            string Examples_2;
+            string Examples_3;
+            string Examples_4;
+            string Examples_5;
+            string Examples_6;
+            string Examples_7;
+            string Examples_8;
+            string Examples_9;
+
+            ExampleList* pExample;
+
+            string firstRow;
+            string ln;
+            getline(myfilestream, firstRow);
+
+            for(int x=0; x <= 14000 && getline(myfilestream, ln); x++)
+            {
+                pExample = new ExampleList();  //initializing new ExampleList
+                stringstream str(ln);
+
+                // Word
+                getline(str, word, ',' );
+
+                //Meaning
+                getline(str, meaning, ',' );
+
+                //Examples_0
+                getline(str, Examples_0, ',');
+                //if Example is not empty string insert into list
+                if(!Examples_0.empty()){
+                    pExample->InsertExample(Examples_0) ;
+                }
+
+                //Examples_1
+                getline(str, Examples_1, ',');
+                //if Example is not empty string insert into list
+                if(!Examples_1.empty())
+                    pExample->InsertExample(Examples_1) ;
+
+                //Examples_2
+                getline(str, Examples_2, ',');
+                //if Example is not exmpty string insert into list
+                if(!Examples_2.empty())
+                    pExample->InsertExample(Examples_2) ;
+
+                //Examples_3
+                getline(str,Examples_3, ',');
+                if(!Examples_3.empty())
+                    pExample->InsertExample(Examples_3) ;
+
+                //Examples_4
+                getline(str, Examples_4, ',' );
+                if(!Examples_4.empty())
+                    pExample->InsertExample(Examples_4) ;
+
+                //Examples_5
+                getline(str, Examples_5, ',' );
+                if(!Examples_5.empty())
+                    pExample->InsertExample(Examples_5) ;
+
+                //Examples_6
+                getline(str, Examples_6, ',' );
+                if(!Examples_6.empty())
+                    pExample->InsertExample(Examples_6) ;
+
+                //Examples_7
+                getline(str, Examples_7, ',' );
+                if(!Examples_7.empty())
+                    pExample->InsertExample(Examples_7) ;
+
+                //Examples_8
+                getline(str, Examples_8, ',' );
+                if(!Examples_8.empty())
+                    pExample->InsertExample(Examples_8) ;
+
+                //Examples_9
+                getline(str, Examples_9, ',' );
+                if(!Examples_9.empty())
+                    pExample->InsertExample(Examples_9) ;
+
+
+                //Inserts the Word, its meaning and a pointer to Examples List
+                //in the Hash Table
+                InsertWord(word, meaning, pExample);
+            }
+        }
+
+        myfilestream.close();
+        //cout<<"File Successfully closed"<<endl;
+    }
+};
+
+//-------------------------------------
+//            MAIN METHOD
+//-------------------------------------
+int main ()
+{
+    int choice;	//variable for switch case interface
+
+    Hash *hash = new Hash();	//Hash class object, creates table and reads in file info
+    hash->Parser();
+    FavoritesList *favorite = new FavoritesList();
+
+    cout<<"##################################################"<<endl;
+    cout << "    ### WELCOME TO MY DICTIONARY ###\n";
+    cout<< "1. Find Meaning of a Word."<<endl;
+    cout<< "2. Get Example Sentences for a Word."<<endl;
+    cout<< "3. Add Example Sentence for a Word."<<endl;
+    cout<< "4. Add a word To Favorites."<<endl;
+    cout<< "5. Delete a Word from Favorites."<<endl;
+    cout<< "6. Show Favorites List."<<endl<<endl;
+    cout<< "Press 0 to Exit"<<endl;
+    cout<<"##################################################"<<endl<<endl;
+
+    do
+    {	cout<<"--------------------------"<<endl;
+        cout<<"Enter your choice: ";
+        cin >> choice;
+        string word;
+
+        switch (choice)
+        {
+
+            case 0:
+                cout << "\nEXITTED" << endl;
+                break;
+
+            case 1:
+            {
+                string word;
+                cin.ignore();   //get rid of extra chars(\n)
+                cout<< "--------------------------"<<endl;
+                cout << "Enter the Word: \n";
+                std::getline(std::cin, word);
+                hash->showMeaning(word); //Finds word entered by the user
+                break;
+            }
+            case 2:
+            {
+                string word;
+                cin.ignore();
+                cout<< "--------------------------"<<endl;
+                cout << "Enter the Word: ";
+                std::getline(std::cin, word);
+                hash->ShowSentences(word); //Finds sentence entered by the user
+                break;
+            }
+            case 3:
+            {
+                string word;
+                cin.ignore();
+                cout<< "--------------------------"<<endl;
+                cout << "Enter the Word: ";
+                std::getline(std::cin, word);
+                hash->AddSentence(word); //adds sentence entered by the user
+                break;
+            }
+            case 4:
+            {
+                string word;
+                cin.ignore();
+                cout<< "--------------------------"<<endl;
+                cout << "Enter the Word: ";
+                std::getline(std::cin, word);
+                hash->AddToFavorites(word, favorite);  //adds word to favorites list
+                break;
+            }
+            case 5:
+            {
+                string word;
+                cin.ignore();
+                cout<< "--------------------------"<<endl;
+                cout << "Enter the Word to Delete: ";
+                std::getline(std::cin, word);
+                hash->DeleteFromFavorites(word, favorite);  //delete word to favorites list
+                break;
+            }
+            case 6:
+            {
+                hash->ShowFavorites(favorite);  //delete word to favorites list
+                break;
+            }
+            default:
+                cout << "\nPlease Enter Right Choice" << endl;
+
+        }
+    } while (choice != 0);
+    return 0;
+}
